@@ -98,9 +98,11 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link />
+    <Link />
+  </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="btnode.cpp" />
-    <ClCompile Include="btree.cpp" />
     <ClCompile Include="buffile.cpp" />
     <ClCompile Include="fixfld.cpp" />
     <ClCompile Include="fixlen.cpp" />
@@ -109,7 +111,6 @@
     <ClCompile Include="iobuffer.cpp" />
     <ClCompile Include="length.cpp" />
     <ClCompile Include="recording.cpp" />
-    <ClCompile Include="simpind.cpp" />
     <ClCompile Include="testbtree.cpp" />
     <ClCompile Include="varlen.cpp" />
   </ItemGroup>
@@ -125,7 +126,9 @@
     <ClInclude Include="length.h" />
     <ClInclude Include="recfile.h" />
     <ClInclude Include="recording.h" />
-    <ClInclude Include="simpind.h" />
+    <ClInclude Include="simpind.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="varlen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
