@@ -26,7 +26,8 @@ public:
 	//int Search (const keyType key) const;
 	void Print(ostream &) const;
 	int LargestKey(); // returns value of largest key
-	int Split(BTreeNode<keyType> * newNode); // move keys into newNode
+	//int Split(BTreeNode<keyType> * newNode); // move keys into newNode
+	int Split(BTreeNode<keyType> * newNode, BTreeNode<keyType> * thisNode); // move keys into newNode
 	int Merge(BTreeNode<keyType> * fromNode); // move keys from fromNode
 	int UpdateKey(keyType oldKey, keyType newKey, int recAddr = -1);
 	int Pack(IOBuffer& buffer) const;
@@ -87,7 +88,8 @@ int BTreeNode<keyType>::LargestKey()
 }
 
 template <class keyType>
-int BTreeNode<keyType>::Split(BTreeNode<keyType> * newNode)
+int BTreeNode<keyType>::Split(BTreeNode<keyType> * newNode, BTreeNode<keyType> * thisNode)
+//int BTreeNode<keyType>::Split(BTreeNode<keyType> * newNode)
 {
 	// check for sufficient number of keys
 	if (NumKeys < MaxKeys) return 0;
@@ -95,8 +97,7 @@ int BTreeNode<keyType>::Split(BTreeNode<keyType> * newNode)
 	int midpt = (NumKeys + 1) / 2;
 	int numNewKeys = NumKeys - midpt;
 	// check that number of keys for newNode is ok
-	if (numNewKeys > newNode->MaxBKeys
-		|| numNewKeys < newNode->MinKeys)
+	if (numNewKeys > newNode->MaxBKeys || numNewKeys < newNode->MinKeys)
 		return 0;
 	// move the keys and recaddrs from this to newNode
 	for (int i = midpt; i < NumKeys; i++)
@@ -108,6 +109,24 @@ int BTreeNode<keyType>::Split(BTreeNode<keyType> * newNode)
 	newNode->NumKeys = numNewKeys;
 	NumKeys = midpt;
 	// Link the nodes together
+	newNode->NextNode = thisNode->RecAddr;
+	//thisNode->NextNode = newNode->RecAddr;
+
+	//thisNode->prev
+	/*cout << "this is newNode newKey :" << thisNode->numKeys() << endl;
+	cout << "this is thisNode newKey :" << newNode->numKeys() << endl;
+	cout << "this is newNode inside newNode :" << endl;*/
+	newNode->Print(cout);
+	thisNode->Print(cout);
+
+
+	//cout << "this from recAddr :" << thisNode->RecAddr << endl;
+	//cout << "this from NextNode :" << thisNode->NextNode << endl;
+	//cout << "this from inside newNode :" << endl;
+	//thisNode->Print(cout);
+
+	//cout << "end of split------------" << endl<< endl;
+	//newNode->NextNode = thisNode->RecAddr;
 	return 1;
 }
 
@@ -175,6 +194,11 @@ template <class keyType>
 int BTreeNode<keyType>::Unpack(IOBuffer& buffer)
 {
 	int result;
+	int tempI;
+	char *tempc[11];
+	//result = buffer.Unpack(tempc);
+	//result = buffer.Unpack(&tempI);
+	//cout << "temporary char: " << tempI << endl;
 	result = buffer.Unpack(&NumKeys);
 	for (int i = 0; i < NumKeys; i++)
 	{// note only pack the actual keys and recaddrs

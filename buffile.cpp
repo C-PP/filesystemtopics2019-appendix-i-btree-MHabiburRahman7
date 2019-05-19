@@ -12,7 +12,7 @@ int BufferFile::Create(char * filename, int mode)
 // use ios::nocreate to ensure that no file exists
 {
 	if (!(mode & ios::out)) return FALSE; // must include ios::out
-	File.open(filename, ios::out | ios::binary);
+	File.open(filename, ios::out | ios::binary | ios::in);
 	if (!File.good())
 	{
 		File.close();
@@ -20,6 +20,7 @@ int BufferFile::Create(char * filename, int mode)
 	}
 	HeaderSize = WriteHeader();
 	return HeaderSize != 0;
+	//return 1;
 }
 
 int BufferFile::Open(char * filename, int mode)
@@ -30,6 +31,8 @@ int BufferFile::Open(char * filename, int mode)
 	// these modes are not allowed when opening an existing file
 	if (mode&ios::_Noreplace || mode & ios::trunc) return FALSE;
 	File.open(filename, ios::in);
+	cout << "this is file status: " << File.good() << endl;
+	
 	if (!File.good()) return FALSE;
 	File.seekg(0, ios::beg); File.seekp(0, ios::beg);
 	HeaderSize = ReadHeader();

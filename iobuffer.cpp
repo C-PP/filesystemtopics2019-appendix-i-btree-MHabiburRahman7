@@ -46,9 +46,9 @@ int IOBuffer::DRead(istream & stream, int recref)
 // read specified record
 {
 	stream.seekg(recref, ios::beg);
-	int length = stream.tellg();
-	//if (stream.tellg() != recref) return -1;
-	if (length != recref) return -1;
+	//int length = stream.tellg();
+	if (stream.tellg() != recref) return -1;
+	//if (length != recref) return -1;
 	return Read(stream);
 }
 

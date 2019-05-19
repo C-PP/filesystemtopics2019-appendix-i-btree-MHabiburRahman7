@@ -174,6 +174,9 @@ int FixedFieldBuffer::Unpack(void * field, int maxBytes)
 	int start = NextByte; // first byte to be unpacked
 	int packSize = FieldSize[NextField]; // number bytes to be unpacked
 	memcpy(field, &Buffer[start], packSize);
+
+	//cout << "this is field: " << &Buffer[start] << endl;
+
 	NextByte += packSize;
 	NextField++;
 	if (NextField == NumFields) Clear(); // all fields unpacked

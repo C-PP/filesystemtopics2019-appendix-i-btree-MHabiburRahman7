@@ -26,12 +26,32 @@ void FixedLengthBuffer::Clear()
 int FixedLengthBuffer::Read(istream & stream)
 // write the number of bytes in the buffer field definitions
 {
+	char * tem = new char[BufferSize];
 	int recaddr = stream.tellg(); stream.clear();
 	Clear();
 	Packing = FALSE;
+	//stream.read(tem, BufferSize);
 	stream.read(Buffer, BufferSize);
+
+	//cout << "this is buffer type: " << typeid(Buffer).name() << endl;
+	//cout << "this is tem from read: " << tem << endl;
+
 	if (!stream.good()) { stream.clear(); return recaddr; }
 	return recaddr;
+	//int recaddr = stream.tellg(); 
+	//stream.clear();
+	//stream.ignore(100, ' ');
+	//Clear();
+	//Packing = FALSE;
+	//stream.read(Buffer, BufferSize);
+	//if (!stream.good()) {
+	//	cout << "stream is not gud" << endl;
+	//	cout << "this is the stream" << stream.rdbuf() << endl;
+	//	cout << "this is Buffer after read :" << Buffer << endl;
+	//	stream.clear(); 
+	//	return recaddr; 
+	//}
+	//return recaddr;
 }
 
 
