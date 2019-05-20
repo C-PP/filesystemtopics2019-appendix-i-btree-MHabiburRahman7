@@ -26,7 +26,7 @@ void FixedLengthBuffer::Clear()
 int FixedLengthBuffer::Read(istream & stream)
 // write the number of bytes in the buffer field definitions
 {
-	char * tem = new char[BufferSize];
+	//char * tem = new char[BufferSize];
 	int recaddr = stream.tellg(); stream.clear();
 	Clear();
 	Packing = FALSE;

@@ -113,11 +113,11 @@ int BTreeNode<keyType>::Split(BTreeNode<keyType> * newNode, BTreeNode<keyType> *
 	//thisNode->NextNode = newNode->RecAddr;
 
 	//thisNode->prev
-	/*cout << "this is newNode newKey :" << thisNode->numKeys() << endl;
-	cout << "this is thisNode newKey :" << newNode->numKeys() << endl;
-	cout << "this is newNode inside newNode :" << endl;*/
-	newNode->Print(cout);
-	thisNode->Print(cout);
+	//cout << "this is newNode newKey :" << thisNode->numKeys() << endl;
+	//cout << "this is thisNode newKey :" << newNode->numKeys() << endl;
+	//cout << "this is thisNode and newNode in Split Function:" << endl;
+	//newNode->Print(cout);
+	//thisNode->Print(cout);
 
 
 	//cout << "this from recAddr :" << thisNode->RecAddr << endl;

@@ -18,7 +18,7 @@ int main(int argc, char * argv) {
 	int sel;
 
 	while (1) {
-		cout << "\nSelect command 1: record input, 2. display, 3. write to file, 4. read from file, 5. direct read from file, 6. Quit => ";
+		cout << "\nSelect command 1: Insert all character, 2. Print Btree, 3. Print Btree inOrderTransversal, 4. Search Key, 5. Remove Key, 6. Quit => ";
 		cin >> sel;
 
 		switch (sel)
@@ -33,34 +33,52 @@ int main(int argc, char * argv) {
 			}
 
 			//for (i = 0; i<26; i++)
-			for (i = 0; i < 20; i++)
+			for (i = 0; i < 26; i++)
 			{
 				cout << "Inserting " << keys[i] << endl;
 				result = bt.Insert(keys[i], i);
-				//result = bt.Insert(keys[i], i);
-				/*bt.Print(cout);*/
+				//bt.Print(cout);
 			}
 
-			bt.Close();
+			//bt.Close();
 
 			break;
 		}
 		case 2: {
-			result = bt.Open("btree.dat", ios::in);
-			if (!result) {
-				cout << "cannot found btree.dat" << endl;
-				system("pause");
-				//return 0;
-			}
+			bt.Print(cout);
 			break;
 		}
 		case 3: {
 			//bt.Height = 2;
-			bt.Print(cout);
+			bt.InOrderTraversal(cout);
 			break;
 		}
 		case 4: {
-			bt.Search('A');
+			char ser;
+
+			cout << "Key to Search :";
+			cin >> ser;
+
+			result = bt.Search(ser);
+			if (result == -1) {
+				cout << "key : " << ser << " --- does not found" << endl;
+				break;
+			}
+			cout << "key : " <<ser << " --- with address :" << result << endl;
+			break;
+		}
+		case 5: {
+			char ser;
+
+			cout << "Key to remove :";
+			cin >> ser;
+
+			result = bt.Remove(ser);
+			if (result == -1) {
+				cout << "key : " << ser << " --- does not found in this tree " << endl;
+				break;
+			}
+			cout << "key : " << ser << " removed with status :" << result << endl;
 			break;
 		}
 

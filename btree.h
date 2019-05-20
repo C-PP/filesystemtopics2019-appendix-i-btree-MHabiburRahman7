@@ -27,21 +27,24 @@ public:
 	int Open(char * name, int mode);
 	int Create(char * name, int mode);
 	int Close();
-	//int InOrderTraversal();
+
 	int Insert(const keyType key, const int recAddr);
 	int Remove(const keyType key, const int recAddr = -1);
 	int Search(const keyType key, const int recAddr = -1);
 	void Print(ostream &);
 	void Print(ostream &, int nodeAddr, int level);
 
+	void InOrderTraversal(ostream &);
+	void InOrderTraversal(ostream &, int nodeAddr, int level);
+
 	int Height; // height of tree
 protected:
 	typedef BTreeNode<keyType> BTNode;// useful shorthand
 	BTNode * FindLeaf(const keyType key); // load a branch into memory down to the leaf with key
-	BTNode * FindLeaf_ins(const keyType key); // load a branch into memory down to the leaf with key
+	//BTNode * FindLeaf_ins(const keyType key); // load a branch into memory down to the leaf with key
 	BTNode * NewNode();
 	BTNode * Fetch(const int recaddr);
-	BTNode * Fetch_ins(const int recaddr);
+	//BTNode * Fetch_ins(const int recaddr);
 	int Store(BTNode *thisNode);
 	BTNode Root;
 	
@@ -123,10 +126,9 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 	keyType prevKey, largestKey;
 	BTNode * thisNode, *newNode, *parentNode;
 
-	BTNode *temp;
 	thisNode = FindLeaf(key);
-	cout << "this is thisNode at beginning :?????????" << endl;
-	thisNode->Print(cout);
+	//cout << "this is thisNode at beginning :?????????" << endl;
+	//thisNode->Print(cout);
 
 	// test for special case of new largest key in tree
 	if (key > thisNode->LargestKey())
@@ -136,6 +138,7 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 	}
 
 	result = thisNode->Insert(key, recAddr);
+	//thisNode->Print(cout);
 
 	// handle special case of new largest key in tree
 	if (newLargest)
@@ -154,10 +157,10 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 		//thisNode->Split(newNode);
 		thisNode->Split(newNode, thisNode);
 		//Nodes[level] = newNode;
-		//thisNodeAddr = Store(thisNode);
+		thisNodeAddr = Store(thisNode);
 		newNodeAddr = Store(newNode);
 		//cout << "address of thisNode: " << thisNodeAddr << endl;
-		cout << "address of newNode: " << newNodeAddr << endl;
+		//cout << "address of newNode: " << newNodeAddr << endl;
 
 		newNode->RecAddr = newNodeAddr;
 		//thisNode->UpdateKey(newNode->largestKey(), thisNode->LargestKey());
@@ -183,7 +186,7 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 	Root.Keys[0] = thisNode->LargestKey();
 	Root.RecAddrs[0] = newAddr;
 	Root.Keys[1] = newNode->LargestKey();
-	Root.RecAddrs[1] = newNodeAddr; 
+	Root.RecAddrs[1] = newNode->RecAddr;
 
 	//Store(&Root);
 
@@ -196,10 +199,10 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 	Root.NumKeys = 2;
 	Height++;
 
-	cout << "this is root ------" << endl;
-	Root.Print(cout);
+	//cout << "this is root ------" << endl;
+	//Root.Print(cout);
 
-	BTreeFile.Close();
+	//BTreeFile.Close();
 
 	return 1;
 }
@@ -209,14 +212,24 @@ template <class keyType>
 int BTree<keyType>::Remove(const keyType key, const int recAddr)
 {
 	// left for exercise
-	/*
-	int result;
-	result = simpleindex<keytype>::remove(key, recaddr);
-	if (!result)return 0; //remove failed 
-	if (numkeys >= minkeys) return -1; // node underflow 
+	int level = Height - 1;
+	int result, newAddr;
+	BTNode * leafNode, *parentNode;;
+	leafNode = FindLeaf(key);
+
+	result = leafNode->Remove(key, recAddr);
+	//cout << "this is leaf after remove   ------" << endl;
+	//leafNode->Print(cout);
+
+	//Update Address
+	newAddr = Store(leafNode);
+	parentNode = Nodes[level-1];
+	//cout << "this is Nodes - level that found  ------" << endl;
+	result = parentNode->UpdateKey(parentNode->LargestKey(), leafNode->LargestKey());
+	result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+	//parentNode->Print(cout);
+	
 	return 1;
-	*/
-	return -1;
 }
 
 template <class keyType>
@@ -267,6 +280,38 @@ void BTree<keyType>::Print
 	}
 }
 
+template<class keyType>
+inline void BTree<keyType>::InOrderTraversal(ostream & stream)
+{
+	stream << "BTree of height " << Height << " is " << endl;
+	//Root.Print(stream);
+	if (Height > 1)
+		for (int i = 0; i < Root.numKeys(); i++)
+		{
+			InOrderTraversal(stream, Root.RecAddrs[i], 2);
+		}
+	stream << "end of BTree" << endl;
+}
+
+template<class keyType>
+inline void BTree<keyType>::InOrderTraversal(ostream & stream, int nodeAddr, int level)
+{
+	BTNode * thisNode = Fetch(nodeAddr);
+	//stream << "BTree::Print() ->Node at level " << level << " address " << nodeAddr << ' ' << endl;
+	if(level > 2) //skip the root
+		thisNode->Print(stream);
+
+	if (Height > level)
+	{
+		level++;
+		for (int i = 0; i < thisNode->numKeys(); i++)
+		{
+			InOrderTraversal(stream, thisNode->RecAddrs[i], level);
+		}
+		stream << "end of level " << level << endl;
+	}
+}
+
 template <class keyType>
 BTreeNode<keyType> * BTree<keyType>::FindLeaf(const keyType key)
 // load a branch into memory down to the leaf with key
@@ -282,25 +327,12 @@ BTreeNode<keyType> * BTree<keyType>::FindLeaf(const keyType key)
 	return Nodes[level - 1];
 }
 
-template<class keyType>
-BTreeNode<keyType> * BTree<keyType>::FindLeaf_ins(const keyType key)
-{
-	int recAddr, level;
-	for (level = 1; level < Height; level++)
-	{
-		//recAddr = Nodes[level - 1]->Search(key, -1, 0);//inexact search
-		Nodes[level] = Fetch(recAddr);
-		Nodes[level - 1]->Merge(Nodes[level]);
-	}
-	return Nodes[level - 1];
-}
-
 template <class keyType>
 BTreeNode<keyType> * BTree<keyType>::NewNode()
 {// create a fresh node, insert into tree and set RecAddr member
 	BTNode * newNode = new BTNode(Order);
-	//int recAddr = BTreeFile.Append(*newNode);
-	//newNode->RecAddr = recAddr;
+	int recAddr = BTreeFile.Append(*newNode);
+	newNode->RecAddr = recAddr;
 	return newNode;
 }
 
@@ -314,11 +346,7 @@ BTreeNode<keyType> * BTree<keyType>::Fetch(const int recaddr)
 	newNode->RecAddr = result;
 	return newNode;
 }
-template<class keyType>
-BTreeNode < keyType> * BTree<keyType>::Fetch_ins(const int recaddr)
-{
-	return NULL;
-}
+
 template<class keyType>
 int BTree<keyType>::Store(BTNode * thisNode)
 {
