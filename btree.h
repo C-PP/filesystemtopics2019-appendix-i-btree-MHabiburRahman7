@@ -157,7 +157,8 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 		//thisNode->Split(newNode);
 		thisNode->Split(newNode, thisNode);
 		//Nodes[level] = newNode;
-		thisNodeAddr = Store(thisNode);
+		//thisNodeAddr = Store(thisNode);
+		Store(thisNode);
 		newNodeAddr = Store(newNode);
 		//cout << "address of thisNode: " << thisNodeAddr << endl;
 		//cout << "address of newNode: " << newNodeAddr << endl;
@@ -189,9 +190,7 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 	Root.RecAddrs[1] = newNode->RecAddr;
 
 	//Store(&Root);
-
 	//int newAddr = BTreeFile.Append(Root); // put previous root into file
-
 	//Root.Keys[0] = thisNode->LargestKey();
 	//Root.RecAddrs[0] = newAddr;
 	//Root.Keys[1] = newNode->LargestKey();
@@ -201,7 +200,6 @@ int BTree<keyType>::Insert(const keyType key, const int recAddr)
 
 	//cout << "this is root ------" << endl;
 	//Root.Print(cout);
-
 	//BTreeFile.Close();
 
 	return 1;
@@ -213,21 +211,113 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 {
 	// left for exercise
 	int level = Height - 1;
-	int result, newAddr;
-	BTNode * leafNode, *parentNode;;
+	int result, newAddr, levelItt;
+	BTNode *leafNode, *parentNode;
 	leafNode = FindLeaf(key);
 
+	if (leafNode->Search(key) == -1)
+		return -1;
+
+	//Delete at lowest level
 	result = leafNode->Remove(key, recAddr);
 	//cout << "this is leaf after remove   ------" << endl;
 	//leafNode->Print(cout);
 
-	//Update Address
-	newAddr = Store(leafNode);
-	parentNode = Nodes[level-1];
-	//cout << "this is Nodes - level that found  ------" << endl;
-	result = parentNode->UpdateKey(parentNode->LargestKey(), leafNode->LargestKey());
-	result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
-	//parentNode->Print(cout);
+	//leafNode->Print(cout);
+	//Nodes[level-1]->Print(cout);
+
+	level--;
+
+	//cout << "this is level: " << leafNode->LargestKey() << endl;
+	//Update Address and clean Root
+	if (leafNode->numKeys() <= 0) {
+		parentNode = Nodes[level];
+		result = parentNode->Remove(key, parentNode->Search(key));
+		//cout << "after removal:" << endl;
+		//leafNode->Print(cout);
+		//parentNode->Print(cout);
+
+		level--;
+
+		newAddr = Store(parentNode);
+		leafNode = parentNode;
+		parentNode = Nodes[level];
+		result = parentNode->UpdateKey(key, leafNode->LargestKey());
+		result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+		//cout << "after after removal:" << endl;
+		//leafNode->Print(cout);
+		//parentNode->Print(cout);
+	}
+	else {
+		//cout << "this is te largest key " << endl;
+		newAddr = Store(leafNode);
+		parentNode = Nodes[level];
+		leafNode->RecAddr = newAddr;
+		//cout << "this is Nodes - level that found  ------" << endl;
+		result = parentNode->UpdateKey(parentNode->LargestKey(), leafNode->LargestKey());
+		result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+
+		//leafNode->Print(cout);
+		//parentNode->Print(cout);
+		level--;
+		while (level > -1) {
+			leafNode = parentNode;
+			parentNode = Nodes[level];
+
+			//cout << "this is level: " << level << "-- "<< parentNode->Search(key) << endl;
+			//leafNode->Print(cout);
+			//parentNode->Print(cout);
+			if (parentNode->Search(key) >= 1) {
+				//result = parentNode->Remove(key, leafNode->Search(key));
+				newAddr = Store(leafNode);
+				parentNode = Nodes[level];
+				leafNode->RecAddr = newAddr;
+
+				//result = parentNode->Remove(key, parentNode->Search(key));
+				//cout << "this is Nodes - level that found  ------" << endl;
+				result = parentNode->UpdateKey(key, leafNode->LargestKey());
+				result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+
+				cout << "this is after update: " << endl;
+				//parentNode->Print(cout);
+				level--;
+			}
+			else
+				break;
+		}
+	}
+	//cout << "this is nodes 0:" << endl;
+	//Nodes[0]->Print(cout);
+	
+	//newAddr = Store(leafNode);
+	//parentNode = Nodes[level--];
+	//leafNode->RecAddr = newAddr;
+	////cout << "this is Nodes - level that found  ------" << endl;
+	//result = parentNode->UpdateKey(parentNode->LargestKey(), leafNode->LargestKey());
+	//result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+	////parentNode->Print(cout);
+
+	////level--;
+	//
+	//while (level > -1) {
+	//	if (Nodes[level]->Search(key) >= 1) {
+	//		result = Nodes[level]->UpdateKey(Nodes[level]->LargestKey(), leafNode->LargestKey());
+	//		result = Nodes[level]->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+
+	//		parentNode->Print(cout);
+	//		level--;
+	//	}
+	//}
+
+	//Clean the root
+	/*while (1) {
+		if (Nodes[level]->Search(key) != -1) {
+			result = Nodes[level]->Remove(key);
+			level--;
+		}
+		else
+			break;
+	}*/
 	
 	return 1;
 }

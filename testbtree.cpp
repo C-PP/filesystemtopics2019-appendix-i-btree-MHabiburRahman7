@@ -45,11 +45,12 @@ int main(int argc, char * argv) {
 			break;
 		}
 		case 2: {
+			cout << "Print Btree from the root :" << endl;
 			bt.Print(cout);
 			break;
 		}
 		case 3: {
-			//bt.Height = 2;
+			cout << "Print Btree inOrderTraversal mode :" << endl;
 			bt.InOrderTraversal(cout);
 			break;
 		}
