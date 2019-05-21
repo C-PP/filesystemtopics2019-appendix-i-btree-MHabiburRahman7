@@ -215,6 +215,7 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 	BTNode *leafNode, *parentNode;
 	leafNode = FindLeaf(key);
 
+	//If the deleted key is not exist
 	if (leafNode->Search(key) == -1)
 		return -1;
 
@@ -222,33 +223,46 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 	result = leafNode->Remove(key, recAddr);
 	//cout << "this is leaf after remove   ------" << endl;
 	//leafNode->Print(cout);
-
-	//leafNode->Print(cout);
 	//Nodes[level-1]->Print(cout);
 
 	level--;
 
 	//cout << "this is level: " << leafNode->LargestKey() << endl;
-	//Update Address and clean Root
-	if (leafNode->numKeys() <= 0) {
+
+	//Update Address of parent and clean Root
+	if (leafNode->numKeys() <= 0) { // If the leaf is now empty
 		parentNode = Nodes[level];
 		result = parentNode->Remove(key, parentNode->Search(key));
 		//cout << "after removal:" << endl;
 		//leafNode->Print(cout);
 		//parentNode->Print(cout);
+		//level--;
 
-		level--;
+		//Track the parents
+		while (level > 0) {
+			newAddr = Store(parentNode);
+			level--;
+			leafNode = parentNode;
+			parentNode = Nodes[level];
+			result = parentNode->UpdateKey(key, leafNode->LargestKey());
+			result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
 
-		newAddr = Store(parentNode);
-		leafNode = parentNode;
-		parentNode = Nodes[level];
-		result = parentNode->UpdateKey(key, leafNode->LargestKey());
-		result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
-		//cout << "after after removal:" << endl;
+			//newAddr = Store(parentNode);
+			//cout << "after after removal:" << endl;
+			//leafNode->Print(cout);
+			//parentNode->Print(cout);
+		}
+
+		//cout << "parent node check, this is level: " << level << endl;
 		//leafNode->Print(cout);
 		//parentNode->Print(cout);
+		
+		//if it is necessary to change the Root node
+		if (leafNode->numKeys() <= 0) {			
+			result = parentNode->Remove(leafNode->LargestKey(), parentNode->Search(leafNode->LargestKey()));
+		}
 	}
-	else {
+	else { //If leaf still has value
 		//cout << "this is te largest key " << endl;
 		newAddr = Store(leafNode);
 		parentNode = Nodes[level];
@@ -260,6 +274,8 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 		//leafNode->Print(cout);
 		//parentNode->Print(cout);
 		level--;
+
+		//Track Parents
 		while (level > -1) {
 			leafNode = parentNode;
 			parentNode = Nodes[level];
@@ -267,6 +283,8 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 			//cout << "this is level: " << level << "-- "<< parentNode->Search(key) << endl;
 			//leafNode->Print(cout);
 			//parentNode->Print(cout);
+
+			//If parent has relation, update it
 			if (parentNode->Search(key) >= 1) {
 				//result = parentNode->Remove(key, leafNode->Search(key));
 				newAddr = Store(leafNode);
@@ -278,7 +296,7 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 				result = parentNode->UpdateKey(key, leafNode->LargestKey());
 				result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
 
-				cout << "this is after update: " << endl;
+				//cout << "this is after update: " << endl;
 				//parentNode->Print(cout);
 				level--;
 			}
@@ -309,16 +327,6 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 	//	}
 	//}
 
-	//Clean the root
-	/*while (1) {
-		if (Nodes[level]->Search(key) != -1) {
-			result = Nodes[level]->Remove(key);
-			level--;
-		}
-		else
-			break;
-	}*/
-	
 	return 1;
 }
 
@@ -358,7 +366,6 @@ void BTree<keyType>::Print
 
 	thisNode->Print(stream);
 	
-
 	if (Height > level)
 	{
 		level++;

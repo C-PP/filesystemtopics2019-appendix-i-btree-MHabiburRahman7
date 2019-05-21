@@ -15,13 +15,13 @@ int main(int argc, char * argv) {
 	int result, i;
 	BTree <char> bt(BTreeSize);
 
-	int sel;
+	int select;
 
 	while (1) {
 		cout << "\nSelect command 1: Insert all character, 2. Print Btree, 3. Print Btree inOrderTransversal, 4. Search Key, 5. Remove Key, 6. Quit => ";
-		cin >> sel;
+		cin >> select;
 
-		switch (sel)
+		switch (select)
 		{
 		case 1: {
 			cout << "input data = " << keys << endl;
@@ -29,18 +29,15 @@ int main(int argc, char * argv) {
 			if (!result) {
 				cout << "Please delete btree.dat" << endl;
 				system("pause");
-				//return 0;
+				break;
 			}
 
-			//for (i = 0; i<26; i++)
 			for (i = 0; i < 26; i++)
 			{
 				cout << "Inserting " << keys[i] << endl;
 				result = bt.Insert(keys[i], i);
 				//bt.Print(cout);
 			}
-
-			//bt.Close();
 
 			break;
 		}
@@ -79,7 +76,7 @@ int main(int argc, char * argv) {
 				cout << "key : " << ser << " --- does not found in this tree " << endl;
 				break;
 			}
-			cout << "key : " << ser << " removed with status :" << result << endl;
+			cout << "key : " << ser << " successfully removed!" << endl;
 			break;
 		}
 
