@@ -241,11 +241,12 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 		//Track the parents
 		while (level > 0) {
 			newAddr = Store(parentNode);
+			//leafNode->RecAddr = newAddr;
 			level--;
 			leafNode = parentNode;
 			parentNode = Nodes[level];
 			result = parentNode->UpdateKey(key, leafNode->LargestKey());
-			result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+			//result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
 
 			//newAddr = Store(parentNode);
 			//cout << "after after removal:" << endl;
@@ -268,11 +269,16 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 		parentNode = Nodes[level];
 		leafNode->RecAddr = newAddr;
 		//cout << "this is Nodes - level that found  ------" << endl;
-		result = parentNode->UpdateKey(parentNode->LargestKey(), leafNode->LargestKey());
-		result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+		result = parentNode->UpdateKey(key, leafNode->LargestKey());
+		//result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
 
+		//cout << "this is after else-id:" << endl;
 		//leafNode->Print(cout);
 		//parentNode->Print(cout);
+
+		newAddr = Store(parentNode);
+		parentNode->RecAddr = newAddr;
+
 		level--;
 
 		//Track Parents
@@ -280,10 +286,14 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 			leafNode = parentNode;
 			parentNode = Nodes[level];
 
+			result = parentNode->UpdateKey(key, leafNode->LargestKey());
 			//cout << "this is level: " << level << "-- "<< parentNode->Search(key) << endl;
 			//leafNode->Print(cout);
 			//parentNode->Print(cout);
 
+			//cout << "parent before if:" << endl;
+			//parentNode->Print(cout);
+			
 			//If parent has relation, update it
 			if (parentNode->Search(key) >= 1) {
 				//result = parentNode->Remove(key, leafNode->Search(key));
@@ -294,12 +304,13 @@ int BTree<keyType>::Remove(const keyType key, const int recAddr)
 				//result = parentNode->Remove(key, parentNode->Search(key));
 				//cout << "this is Nodes - level that found  ------" << endl;
 				result = parentNode->UpdateKey(key, leafNode->LargestKey());
-				result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
+				//result = parentNode->Insert(leafNode->LargestKey(), leafNode->RecAddr);
 
 				//cout << "this is after update: " << endl;
 				//parentNode->Print(cout);
 				level--;
 			}
+//			else if(parentNode->Search())
 			else
 				break;
 		}
